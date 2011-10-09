@@ -13,7 +13,8 @@ The Guide is mainly [/page:all in C], but also in [/php:all PHP] and [/lua:all L
 
 * [第一章 ZeroMQ基础][1]
 * [第二章 ZeroMQ进阶][2]
-* [第三章 高级请求-应答模式][2]
+* [第三章 高级请求-应答模式][3]
+* [第四章 可靠的请求-应答模式][4]
 
 
   [1]: chapter1.md
