@@ -27,3 +27,4 @@ The Guide is mainly [/page:all in C], but also in [/php:all PHP] and [/lua:all L
 ---
 
 This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 License](http://creativecommons.org/licenses/by-sa/3.0/).
+

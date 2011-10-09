@@ -1,7 +1,3 @@
-
-**作者: Pieter Hintjens <ph@imatix.com>, CEO iMatix Corporation.**
-**翻译: 张吉 <jizhang@anjuke.com>, 安居客集团 好租网工程师**
-
 ## 第一章 ZeroMQ基础
 
 ### 拯救世界
@@ -1215,3 +1211,4 @@ wuclient 56789 &
 
   [iMatix]: http://www.imatix.com/
   [AMQP]: http://www.amqp.org/
+
