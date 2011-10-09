@@ -113,7 +113,7 @@ zmq_bind (socket, "ipc://myserver.ipc");
 
 发送和接收消息使用的是zmq_send()和zmq_recv()这两个函数。虽然函数名称看起来很直白，但由于ZMQ的I/O模式和传统的TCP协议有很大不同，因此还是需要花点时间去理解的。
 
-![1](images/chapter2_1.png)
+![1](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_1.png)
 
 让我们看一看TCP套接字和ZMQ套接字之间在传输数据方面的区别：
 
@@ -122,7 +122,7 @@ zmq_bind (socket, "ipc://myserver.ipc");
 * ZMQ套接字可以和多个套接字进行连接（如果套接字类型允许的话）。TCP协议只能进行点对点的连接，而ZMQ则可以进行一对多（类似于无线广播）、多对多（类似于邮局）、多对一（类似于信箱），当然也包括一对一的情况。
 * ZMQ套接字可以发送消息给多个端点（扇出模型），或从多个端点中接收消息（扇入模型）
 
-![2](images/chapter2_2.png)
+![2](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_2.png)
 
 所以，向套接字写入一个消息时可能会将消息发送给很多节点，相应的，套接字又会从所有已建立的连接中接收消息。zmq_recv()方法使用了公平队列的算法来决定接收哪个连接的消息。
 
@@ -146,11 +146,11 @@ ZMQ提供了一组单播传输协议（inporc, ipc, tcp），和两个广播协�
 
 只可惜答案并不是这样的。ZMQ不只是一个数据传输的工具，而是在现有通信协议之上建立起来的新架构。它的数据帧和现有的协议并不兼容，如下面是一个HTTP请求和ZMQ请求的对比，同样使用的是TCP/IPC协议：
 
-![3](images/chapter2_3.png)
+![3](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_3.png)
 
 HTTP请求使用CR-LF（换行符）作为信息帧的间隔，而ZMQ则使用指定长度来定义帧：
 
-![4](images/chapter2_4.png)
+![4](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_4.png)
 
 所以说，你的确是可以用ZMQ来写一个类似于HTTP协议的东西，但是这并不是HTTP。
 
@@ -459,7 +459,7 @@ assert (rc == 0);
     zmq_msg_close (&message);
 ```
 
-![5](images/chapter2_5.png)
+![5](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_5.png)
 
 下面是worker进程的代码，它会打开三个套接字：用于接收任务的PULL、用户发送结果的PUSH、以及用于接收自杀信号的SUB，使用zmq_poll()进行轮询：
 
@@ -753,11 +753,11 @@ while (1) {
 
 ZMQ网络也是一样，如果规模不断增长，就一定会需要中间件。ZMQ中，我们称其为“装置”。在构建ZMQ软件的初期，我们会画出几个节点，然后将它们连接起来，不使用中间件：
 
-![6](images/chapter2_6.png)
+![6](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_6.png)
 
 随后，我们对这个结构不断地进行扩充，将装置放到特定的位置，进一步增加节点数量：
 
-![7](images/chapter2_7.png)
+![7](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_7.png)
 
 ZMQ装置没有具体的设计规则，但一般会有一组“前端”端点和一组“后端”端点。装置是无状态的，因此可以被广泛地部署在网络中。你可以在进程中启动一个线程来运行装置，或者直接在一个进程中运行装置。ZMQ内部也提供了基本的装置实现可供使用。
 
@@ -821,7 +821,7 @@ int main (void)
 
 我们称这个装置为代理，因为它既是订阅者，又是发布者。这就意味着，添加该装置时不需要更改其他程序的代码，只需让外网订阅者知道新的网络地址即可。
 
-![8](images/chapter2_8.png)
+![8](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_8.png)
 
 可以注意到，这段程序能够正确处理多帧消息，会将它完整的转发给订阅者。如果我们在发送时不指定ZMQ_SNDMORE选项，那么下游节点收到的消息就可能是破损的。编写装置时应该要保证能够正确地处理多帧消息，否则会造成消息的丢失。
 
@@ -833,7 +833,7 @@ int main (void)
 
 我们有两种方式来连接多个客户端和多个服务端。第一种是让客户端直接和多个服务端进行连接。客户端套接字可以连接至多个服务端套接字，它所发送的请求会通过负载均衡的方式分发给服务端。比如说，有一个客户端连接了三个服务端，A、B、C，客户端产生了R1、R2、R3、R4四个请求，那么，R1和R4会由服务A处理，R2由B处理，R3由C处理：
 
-![9](images/chapter2_9.png)
+![9](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_9.png)
 
 这种设计的好处在于可以方便地添加客户端，但若要添加服务端，那就得修改每个客户端的配置。如果你有100个客户端，需要添加三个服务端，那么这些客户端都需要重新进行配置，让其知道新服务端的存在。
 
@@ -851,7 +851,7 @@ int main (void)
 
 下方的简图描述了一个请求-应答模式，REQ和ROUTER通信，DEALER再和REP通信。ROUTER和DEALER之间我们则需要进行消息转发：
 
-![10](images/chapter2_10.png)
+![10](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_10.png)
 
 请求-应答代理会将两个套接字分别绑定到前端和后端，供客户端和服务端套接字连接。在使用该装置之前，还需要对客户端和服务端的代码进行调整。
 
@@ -992,7 +992,7 @@ int main (void)
 
 使用请求-应答代理可以让你的C/S网络结构更易于扩展：客户端不知道服务端的存在，服务端不知道客户端的存在。网络中唯一稳定的组件是中间的代理装置：
 
-![11](images/chapter2_11.png)
+![11](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_11.png)
 
 #### 内置装置
 
@@ -1153,7 +1153,7 @@ int main (void)
 
 示例中的“工作”仅仅是1秒钟的停留，我们可以在worker中进行任意的操作，包括与其他节点进行通信。消息的流向是这样的：REQ-ROUTER-queue-DEALER-REP。
 
-![12](images/chapter2_12.png)
+![12](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_12.png)
 
 ### 线程间的信号传输
 
@@ -1161,7 +1161,7 @@ int main (void)
 
 下面的示例演示了三个线程之间需要如何进行同步：
 
-![13](images/chapter2_13.png)
+![13](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_13.png)
 
 我们使用PAIR套接字和inproc协议。
 
@@ -1311,7 +1311,7 @@ int main (void)
 }
 ```
 
-![14](images/chapter2_14.png)
+![14](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_14.png)
 
 以下是订阅者的代码：
 
@@ -1432,7 +1432,7 @@ ZMQ的多段消息能够很好地支持零拷贝。在传统消息系统中，�
 
 这里有两个套接字正在欢快地传送着气象信息：
 
-![15](images/chapter2_15.png)
+![15](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_15.png)
 
 如果接收方（SUB、PULL、REQ）指定了套接字标识，当它们断开网络时，发送方（PUB、PUSH、REP）会为它们缓存信息，直至达到阈值（HWM）。这里发送方不需要有套接字标识。
 
@@ -1442,7 +1442,7 @@ ZMQ的多段消息能够很好地支持零拷贝。在传统消息系统中，�
 
 在ZMQ内部，两个套接字相连时会先交换各自的标识。如果发生对方没有ID，则会自行生成一个用以标识对方：
 
-![16](images/chapter2_16.png)
+![16](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_16.png)
 
 但套接字也可以告知对方自己的标识，那当它们第二次连接时，就能知道对方的身份：
 
@@ -1498,7 +1498,7 @@ zmq_setsockopt (socket, ZMQ_IDENTITY, "Lucy", 4);
 
 这是发布-订阅模式中一个带有信封的消息：
 
-![17](images/chapter2_17.png)
+![17](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_17.png)
 
 我们回忆一下，发布-订阅模式中，消息的接收是根据订阅信息来的，也就是消息的前缀。将这个前缀放入单独的消息帧，可以让匹配变得非常明显。因为不会有一个应用程序恰好只匹配了一部分数据。
 
@@ -1583,7 +1583,7 @@ int main (void)
 
 如果你订阅了多个套接字，又想知道这些套接字的标识，从而通过另一个套接字来发送消息给它们（这个用例很常见），你可以让发布者创建一条含有三帧的消息：
 
-![18](images/chapter2_18.png)
+![18](https://github.com/haozu/zguide-cn/raw/master/images/chapter2_18.png)
 
 ### （半）持久订阅者和阈值（HWM）
 

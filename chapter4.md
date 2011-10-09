@@ -67,7 +67,7 @@
 * 请求超时后重发消息，循环多次；
 * 若仍无消息，则结束当前事务。
 
-![1](images/chapter4_1.png)
+![1](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_1.png)
 
 使用REQ套接字时必须严格遵守发送-接收过程，因为它内部采用了一个有限状态机来限定状态，这一特性会让我们应用“海盗”模式时遇上一些麻烦。最简单的做法是将REQ套接字关闭重启，从而打破这一限定。
 
@@ -240,7 +240,7 @@ E: server seems to be offline, abandoning
 
 在第三章中，队列装置的基本算法是最近最少使用算法。那么，如果worker死亡或阻塞，我们需要做些什么？答案是很少很少。我们已经在client中加入了重试的机制，所以，使用基本的LRU队列就可以运作得很好了。这种做法也符合ZMQ的逻辑，所以我们可以通过在点对点交互中插入一个简单的队列装置来扩展它：
 
-![2](images/chapter4_2.png)
+![2](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_2.png)
 
 我们可以直接使用“懒惰的海盗”模式中的client，以下是队列装置的代码：
 
@@ -387,7 +387,7 @@ int main (void)
 
 之前我们使用REQ套接字作为worker的套接字类型，但在偏执海盗模式中我们会改用DEALER套接字，从而使我们能够任意地发送和接受消息，而不是像REQ套接字那样必须完成发送-接受循环。而DEALER的缺点是我们必须自己管理消息信封。如果你不知道信封是什么，那请阅读第三章。
 
-![3](images/chapter4_3.png)
+![3](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_3.png)
 
 我们仍会使用懒惰海盗模式的client，以下是偏执海盗的队列装置代码：
 
@@ -789,7 +789,7 @@ while (1) {
 
 引入“服务名称”的机制，是对偏执海盗队列的一个简单补充，而结果是让其成为一个面向服务的代理。
 
-![4](images/chapter4_4.png)
+![4](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_4.png)
 
 在实施管家模式之前，我们需要为client和worker编写一个框架。如果程序员可以通过简单的API来实现这种模式，那就没有必要让他们去了解管家模式的协议内容和实现方法了。
 所以，我们第一个协议（即管家模式协议）定义了分布式架构中节点是如何互相交互的，第二个协议则要定义应用程序应该如何通过框架来使用这一协议。
@@ -2357,7 +2357,7 @@ int main (int argc, char *argv [])
 
 我们有很多方法来实现一种持久化的请求-应答架构，而目标当然是越简单越好。我能想到的最简单的方式是提供一种成为“巨人”的代理服务，它不会影响现有worker的工作，若client想要立即得到应答，它可以和代理进行通信；如果它不是那么着急，那就可以和巨人通信：“嗨，巨人，麻烦帮我处理下这个请求，我去买些菜。”
 
-![5](images/chapter4_5.png)
+![5](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_5.png)
 
 这样一来，居然就既是worker又是client。client和巨人之间的对话一般是：
 
@@ -2810,7 +2810,7 @@ int main (int argc, char *argv [])
   * 易于理解和使用；
   * 能够进行可靠的故障切换。
 
-![6](images/chapter4_6.png)
+![6](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_6.png)
 
 假设我们有一组双子星模式的服务器，以下是可能发生的故障：
 
@@ -2834,7 +2834,7 @@ int main (int argc, char *argv [])
 
 双子星模式的故障恢复过程是：在修复了主机的问题后，将备机做关闭处理，稍后再重新开启：
 
-![7](images/chapter4_7.png)
+![7](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_7.png)
 
 双子星模式的关闭过程有两种：
 
@@ -3212,7 +3212,7 @@ bstarcli
 
 下图展现了服务进程的状态图。绿色状态下会接收客户端请求，粉色状态会拒绝请求。事件指的是同伴的状态，所以“同伴激活态”指的是同伴机器告知我们它处于激活态。“客户请求”表示我们从客户端获得了请求，“客户投票”则指我们从客户端获得了请求并且同伴已经超时死亡。
 
-![8](images/chapter4_8.png)
+![8](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_8.png)
 
 需要注意的是，服务进程使用PUB-SUB套接字进行状态交换，其它类型的套接字在这里不适用。比如，PUSH和DEALER套接字在没有节点相连的时候会发生阻塞；PAIR套接字不会在节点断开后进行重连；ROUTER套接字需要地址才能发送消息。
 
@@ -3649,7 +3649,7 @@ int main (int argc, char *argv [])
 
 我们需要处理的故障类型有：服务崩溃或重启、服务过载、网络因素等。为获取可靠性，我们必须建立一个服务群，当某个服务端崩溃后，客户端可以连接其他的服务端。实践中，两个服务端就已经足够了，但事实上服务端的数量可以是任意个。
 
-![9](images/chapter4_9.png)
+![9](https://github.com/haozu/zguide-cn/raw/master/images/chapter4_9.png)
 
 在这个架构中，大量客户端和少量服务端进行通信，服务端将套接字绑定至单独的端口，这和管家模式中的代理有很大不同。对于客户端来说，它有这样几种选择：
 

@@ -163,8 +163,8 @@ while ($line < @input) {
             writeln_images ($_);
         }
         writeln_images ("</pre>");
-        writeln ("![$diagram](images/$self\_$diagram.png)");
-#        writeln ("![$diagram]($imgpath$self\_$diagram.png)");
+#        writeln ("![$diagram](images/$self\_$diagram.png)");
+        writeln ("![$diagram]($imgpath$self\_$diagram.png)");
 #        writeln ("<center>");
 #        writeln ("<img src=\"$imgpath$self\_$diagram.png\" alt=\"$diagram\">");
 #        writeln ("</center>");

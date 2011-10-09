@@ -1,4 +1,5 @@
 .- vim: set filetype=markdown:
+.set GIT=https://github.com/haozu/zguide-cn
 
 ## 第二章 ZeroMQ进阶
 
