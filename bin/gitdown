@@ -1,0 +1,519 @@
+#! /usr/bin/perl
+#   gitdoc - a tool for writing github-hosted documents.
+#
+#   See README.txt for details.
+#
+#   Copyright (c) 1996-2011 iMatix Corporation
+#
+#   This is free software; you can redistribute it and/or modify it under the
+#   terms of the GNU General Public License as published by the Free Software
+#   Foundation; either version 3 of the License, or (at your option) any later
+#   version.
+#
+#   This software is distributed in the hope that it will be useful, but
+#   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABIL-
+#   ITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+#   License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+use File::Basename;
+
+# push gitdown path to include for modules
+my $path = dirname(__FILE__);
+push(@INC, $path);
+
+#   Uses the Perl SFL modules from htmlpp
+require 'sflcvdp.pl';                   #   SFL date picture formatting
+
+$version = "2011.03.24";
+
+#   Parse and validate provided filename
+die "Syntax: gitdoc textfilename\n"
+    unless $#ARGV == 0;
+$input = $ARGV [0];
+$self = $input;
+$self =~ s/\.[^.]*$//;
+$output .= "$self.md";
+die "Input should be a .txt file, not a .md file\n"
+    if $input eq $output;
+
+#   Read input file into @input array
+die "Can't read $input: $!"
+    unless open (INPUT, $input);
+while (<INPUT>) {
+    chop;
+    push @input, $_;
+}
+close (INPUT);
+#&insert_anchors;
+
+die "Can't create $output: $!"
+    unless open (OUTPUT, ">$output");
+
+die "Can't create images.html: $!"
+    unless open (IMAGES, ">images.html");
+writeln_images ("<html>");
+
+# set defaults for symbols
+$symbols {"INPUT"}  = $input;
+$symbols {"SELF"}   = $self;
+$symbols {"OUTPUT"} = $output;
+$symbols {"PREBRANCH"} = "raw";
+$symbols {"BRANCH"} = "master";
+
+$imgpath = "";
+
+$line = 0;
+while ($line < @input) {
+    $_ = $input [$line++];
+    if (/^\./) {
+        #   Process directive
+        if (/^\.set\s+(\w+)=(.*)\s*/) {
+            $symbols {$1} = $2;
+
+            # probably quicker to rebuild image path on each symbol definition
+            # than to check and see if it's changed
+            $imgpath = $symbols{GIT}.'/';
+            # allow double slash after : for url
+            $imgpath =~ s|(?<!:)/+|/|g;
+
+            my $subpath .= "$symbols{PREBRANCH}/$symbols{BRANCH}/$symbols{SUBDIR}/images/";
+            # remove starting /
+            $subpath =~ s|^/||;
+            # remove double /
+            $subpath =~ s|/+|/|g;
+            $imgpath .= $subpath;
+        }
+        elsif (/^\.toc(\s+([1-9]))?/) {
+            #   Determine top level in text after .toc
+            if ($2) {
+                $tocl = $2;
+            }
+            else {
+                $tocl = 4;
+                for ($scan = $line; $scan < @input; $scan++) {
+                    $_ = $input [$scan];
+                    if (/<A name="(toc([0-9])-.*)" title=\"(.*)\"/) {
+                        $tocl = $2 if $2 < $tocl;
+                    }
+                }
+            }
+            $prev = "";
+            for ($scan = $line; $scan < @input; $scan++) {
+                $_ = $input [$scan];
+                if (/<A name="(toc([0-9])-.*)" title=\"(.*)\"/) {
+                    #   Top level items at left, others along same line...
+                    if ($2 > $tocl) {
+                        writeln ("&emsp;<a href=\"#$1\">$3</a>");
+                    }
+                    else {
+                        writeln ("\n**<a href=\"#$1\">$3</a>**");
+                    }
+                }
+            }
+        }
+        elsif (/^\.sub\s+([^=]+)=(.*)\s*/) {
+            $subsset {$1} = $2;
+        }
+        elsif (/^\.\-/) {
+            #   Comment, ignore
+        }
+        elsif (/^\.pull (.*)(@[a-zA-Z0-9]+)(,(.*)\s*)?/) {
+            $source = $1;
+            $tag = $2;
+            $opts = $4;
+            die "Can't read $source: $!"
+                unless open (SOURCE, $source);
+            while (<SOURCE>) {
+                if (/$tag/) {
+                    while (<SOURCE>) {
+                        last if /@[a-zA-Z0-9]+/;
+                        chop;
+                        $_ = "    $_" if ($opts eq "code");
+                        s/^    // if ($opts eq "left");
+                        writeln ($_);
+                    }
+                }
+            }
+            close (SOURCE);
+        }
+        elsif (/^\.end/) {
+            writeln ("(More coming soon...)");
+            $EOD = 1;       #   Stop output here
+        }
+        else {
+            print "Illegal directive $_ at line $line.\n";
+            writeln ($_);
+        }
+    }
+#    elsif ($_ eq "[diagram]") {
+    elsif ($_ eq "```textdiagram") {
+        #   Shunt diagram into temporary HTML file for Ditaa
+        $diagram = $diagram + 1;
+        $symbols {"DIAGRAM"} = $diagram;
+        writeln_images ("<pre class=\"textdiagram\" id=\"$self\_$diagram\">");
+        while ($line < @input) {
+            $_ = $input [$line++];
+            #last if /\[\/diagram\]/;
+            last if /```/;
+            s/#/$diagram/;
+            writeln_images ($_);
+        }
+        writeln_images ("</pre>");
+        writeln ("![$diagram](images/$self\_$diagram.png)");
+#        writeln ("![$diagram]($imgpath$self\_$diagram.png)");
+#        writeln ("<center>");
+#        writeln ("<img src=\"$imgpath$self\_$diagram.png\" alt=\"$diagram\">");
+#        writeln ("</center>");
+    }
+    else {
+        #   Normal text
+        writeln ($_);
+    }
+}
+writeln_images ("</html>");
+close (IMAGES);
+close (OUTPUT);
+
+system ("rm -f images/$self\_*");
+if ($diagram) {
+    system ("java -jar $path/ditaa0_9.jar images.html -e utf-8 -o -h -E output.html");
+    #   Need to trim twice for reasons I don't care to explore
+    system ("mogrify -trim images/$self\_*.png");
+    system ("mogrify -trim images/$self\_*.png");
+}
+system ("rm -f output.html images.html");
+exit (0);
+
+
+#   Writes $_ to OUTPUT after expanding all symbols
+
+sub writeln {
+    local ($_) = @_;
+    #   Don't expand symbols in code blocks
+    $_ = expand_symbols ($_) unless /^    /;
+    foreach $token (keys %subsset) {
+        s/$token/$subsset{$token}/g;
+    }
+    print OUTPUT "$_\n" unless $EOD;
+}
+
+sub writeln_images {
+    local ($_) = @_;
+    $_ = expand_symbols ($_);
+    foreach $token (keys %subsset) {
+        s/$token/$subsset{$token}/g;
+    }
+    print IMAGES "$_\n" unless $EOD;
+}
+
+
+#   Insert anchors into text before each header
+
+sub insert_anchors {
+    $prev = "";
+    for ($line = 0; $line < @input; $line++) {
+        $prev = $_;
+        $_ = $input [$line];
+
+        if (/^===/) {
+            splice @input, $line - 1, 0, "<A name=\"toc1-$line\" title=\"$prev\" />";
+            $line++;
+        }
+        elsif (/^---/) {
+            splice @input, $line - 1, 0, "<A name=\"toc2-$line\" title=\"$prev\" />";
+            $line++;
+        }
+        elsif (/^# /) {
+            splice @input, $line, 0, "<A name=\"toc1-$line\" title=\"$'\" />";
+            $line++;
+        }
+        elsif (/^## /) {
+            splice @input, $line, 0, "<A name=\"toc2-$line\" title=\"$'\" />";
+            $line++;
+        }
+        elsif (/^### /) {
+            splice @input, $line, 0, "<A name=\"toc3-$line\" title=\"$'\" />";
+            $line++;
+        }
+        elsif (/^#### /) {
+            splice @input, $line, 0, "<A name=\"toc4-$line\" title=\"$'\" />";
+            $line++;
+        }
+    }
+}
+
+
+#-- Symbol expansion code, taken from htmlpp
+
+#   Recursively expand symbols like this (and in this order):
+#
+#   $(xxx)                  - value of variable
+#   $(xxx?zzz)              - value of variable, or zzz if undefined
+#   %(text?zzz)             - value of environment variable, or zzz if undef
+#   &abc(text)              - intrinsic function with arguments
+#
+sub expand_symbols {
+    local ($_) = @_;
+    local ($before,
+           $match,
+           $after,
+           $expr);
+
+    return unless ($_);                 #   Quit if input string is empty
+
+    for (;;) {
+        #   Force expansion from end of string first, so things like
+        #   $(xxx?$(yyy)) work properly.
+        if (/[\$%]\(/ || /\&([a-z_]+)\s*\(/i) {
+            $before = $`;
+            $match  = $&;
+            $after  = expand_symbols ($');
+            $_ = $before.$match.$after;
+        }
+        #   $(xxx)
+        if (/\$\(([A-Za-z0-9-_\.]+)\)/) {
+            $_ = $`.&valueof ($1).$';
+        }
+        #   $(xxx?zzz)
+        elsif (/\$\(([A-Za-z0-9-_\.]+)\?([^)\$]*)\)/) {
+            $_ = $`.&valueof ($1, $2).$';
+        }
+        #   %(text)
+        elsif (/\%\(([^\)]+)\)/) {
+            $_ = $`.$ENV {$1}.$';
+        }
+        #   %(text?zzz)
+        elsif (/\%\(([^\)]+)\?([^)\$]*)\)/) {
+            $_ = $`.($ENV {$1}? $ENV {$1}: $2).$';
+        }
+        #   &abc(text)
+        elsif (/\&([a-z_]+)\s*\(([^\)]*)\)/i) {
+            $funct = $1;
+            $args = $2;
+            $before = $`;
+            $after = $';
+            $args =~ s/\\/\\\\/g;
+            $_ = eval ("&intrinsic_$funct ($args)");
+            $_ = $before.$_.$after;
+            if ($@) {                   #   Syntax error in Perl statement?
+                &error ("$function is not a valid intrinsic function")
+                    unless $nofunc_mode;
+                last;
+            }
+        }
+        else {
+            last;
+        }
+    }
+    return $_;
+}
+
+
+#   Subroutine returns the value of the specified symbol; it issues a
+#   warning message and returns 'UNDEF' if the symbol is not defined
+#   and the default value is empty.
+#
+sub valueof {
+    local ($symbol, $default) = @_;     #   Argument is symbol name
+    local ($return);                    #   Returned value
+    local ($langed_symbol);             #   Language-dependent symbol
+
+    if (defined ($symbols {$symbol})) {
+        $return = $symbols {$symbol};
+        return $return;
+    }
+    elsif (defined ($default)) {
+        return ($default);
+    }
+    &error ("$_");
+    &error ("($.) undefined symbol \"$symbol\"");
+    $default_warning == 1 || do {
+        &error ("I: Use \$($symbol?default) for default values.");
+        $default_warning = 1;
+    };
+    $symbols {$symbol} = "UNDEF";
+    return $symbols {$symbol};
+}
+
+
+#   INTRINSIC FUNCTIONS
+#
+#   time()                     - Format current time as hh:mm:ss
+#   date()                     - Return current date value
+#   date("picture")            - Format current date using picture
+#   date("picture", date, lc)  - Format specified date using picture & language
+#   week_day([date])           - Get day of week, 0=Sunday to 6=Saturday
+#   year_week([date])          - Get week of year, 1 is first full week
+#   julian_date([date])        - Get Julian date for date
+#   lillian_date([date])       - Get Lillian date for date
+#   date_to_days(date)         - Convert yyyymmdd to Lillian date
+#   days_to_date(days)         - Convert Lillian date to yyyymmdd
+#   future_date(days[,date])   - Calculate a future date
+#   past_date(days[,date])     - Calculate a past date
+#   date_diff(date1[,date2])   - Calculate date1 - date2
+#   image_height("image.ext")  - Get image height (GIF, JPEG)
+#   image_width("image.ext")   - Get image width (GIF, JPEG)
+#   file_size("filename",arg)  - Get size of file: optional arg K or M
+#   file_date("filename")      - Get date of file
+#   file_time("filename")      - Get time of file as hh:mm:ss
+#   normalise("filename")      - Normalise filename to UNIX format
+#   system("command")          - Call a system utility
+#   lower("string")            - Convert string to lower case
+#   upper("string")            - Convert string to upper case
+#
+
+sub intrinsic_date {
+    local ($picture, $value, $language) = @_;
+    $value = &date_now unless $value;
+    $language = $symbols{LANG} unless $language;
+    if ($picture) {
+        return (&conv_date_pict ($value, $picture, $language));
+    }
+    else {
+        return ($value);
+    }
+}
+
+sub intrinsic_time {
+    local ($sec, $min, $hour, $day, $month, $year) = localtime;
+    return (sprintf ("%2d:%02d:%02d", $hour, $min, $sec));
+}
+
+sub intrinsic_week_day {
+    return (&day_of_week ($_ [0]? $_ [0]: &date_now));
+}
+
+sub intrinsic_year_week {
+    return (&week_of_year ($_ [0]? $_ [0]: &date_now));
+}
+
+sub intrinsic_julian_date {
+    return (&julian_date ($_ [0]? $_ [0]: &date_now));
+}
+
+sub intrinsic_lillian_date {
+    return (&date_to_days ($_ [0]? $_ [0]: &date_now));
+}
+
+sub intrinsic_date_to_days {
+    return (&date_to_days ($_ [0]));
+}
+
+sub intrinsic_days_to_date {
+    return (&days_to_date ($_ [0]));
+}
+
+sub intrinsic_future_date {
+    local ($date) = &future_date ($_ [1], 0, $_ [0], 0);
+    return ($date);
+}
+
+sub intrinsic_past_date {
+    local ($date) = &past_date ($_ [1], 0, $_ [0], 0);
+    return ($date);
+}
+
+sub intrinsic_date_diff {
+    local ($date1, $date2) = @_;
+    $date1 = &date_now unless $date1;
+    $date2 = &date_now unless $date2;
+    local ($days) = &date_diff ($date1, 0, $date2, 0);
+    return ($days);
+}
+
+sub intrinsic_image_height {
+    local ($filename) = @_;
+    if (! -e $filename) {
+        &error ("($.) file not found: \"$filename\"");
+    }
+    else {
+        return (&image_height ($filename));
+    }
+}
+
+sub intrinsic_image_width {
+    local ($filename) = @_;
+    if (! -e $filename) {
+        &error ("($.) file not found: \"$filename\"");
+    }
+    else {
+        return (&image_width ($filename));
+    }
+}
+
+sub intrinsic_file_size {
+    local ($filename, $arg) = @_;
+    local ($size) = (stat ($filename)) [7];
+
+    if (! -e $filename) {
+        &error ("($.) file not found: \"$filename\"");
+    }
+    elsif ($arg eq "K") {
+        $size /= 1024;
+    }
+    elsif ($arg eq "M") {
+        $size /= 1048576;
+    }
+    return (int ($size));
+}
+
+sub intrinsic_file_date {
+    local ($filename) = @_;
+    if (! -e $filename) {
+        &error ("($.) file not found: \"$filename\"");
+    }
+    else {
+        local ($mtime) = (stat ($filename)) [9];
+        local ($sec,$min,$hour,$mday,$mon,$year) = localtime ($mtime);
+        return (($year + 1900) * 10000 + ($mon + 1) * 100 + $mday);
+    }
+}
+
+sub intrinsic_file_time {
+    local ($filename) = @_;
+    if (! -e $filename) {
+        &error ("($.) file not found: \"$filename\"");
+    }
+    else {
+        local ($mtime) = (stat ($filename)) [9];
+        local ($sec,$min,$hour,$mday,$mon,$year) = localtime ($mtime);
+        return (sprintf ("%2d:%02d:%02d", $hour, $min, $sec));
+    }
+}
+
+sub intrinsic_normalise {
+    local ($_) = @_;                    #   Get filename argument
+    s/\\/\//g;                          #   Replace DOS-style \ by /
+    s/\s/_/g;                           #   Replace white space by _
+    return ($_);
+}
+
+sub intrinsic_system {
+    local ($_) = `@_`;
+
+    #   Return all but the last character, which should be a newline
+    chop;
+    return ($_);
+}
+
+sub intrinsic_lower {
+    local ($_) = @_;                    #   Get filename argument
+    tr/A-Z/a-z/;
+    return ($_);
+}
+
+sub intrinsic_upper {
+    local ($_) = @_;                    #   Get filename argument
+    tr/a-z/A-Z/;
+    return ($_);
+}
+
+sub error {
+    ($_) = @_;                          #   Get argument
+    print STDERR "E: $_\n";
+    $have_errors = 1;                   #   We have 1 or more errors
+}
