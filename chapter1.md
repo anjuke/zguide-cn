@@ -1,3 +1,19 @@
+
+# ZMQ 指南
+
+**作者: Pieter Hintjens <ph@imatix.com>, CEO iMatix Corporation.**  
+**翻译: 张吉 <jizhang@anjuke.com>, 安居客集团 好租网工程师**
+
+With thanks to Bill Desmarais, Brian Dorsey, CAF, Daniel Lin, Eric Desgranges, Gonzalo Diethelm, Guido Goldstein, Hunter Ford, Kamil Shakirov, Martin Sustrik, Mike Castleman, Naveen Chawla, Nicola Peduzzi, Oliver Smith, Olivier Chamoux, Peter Alexander, Pierre Rouleau, Randy Dryburgh, John Unwin, Alex Thomas, Mihail Minkov, Jeremy Avnet, Michael Compton, Kamil Kisiel, Mark Kharitonov, Guillaume Aubert, Ian Barber, Mike Sheridan, Faruk Akgul, Oleg Sidorov, Lev Givon, Allister MacLeod, Alexander D'Archangel, Andreas Hoelzlwimmer, Han Holl, Robert G. Jakabosky, Felipe Cruz, Marcus McCurdy, Mikhail Kulemin, Dr. Gergő Érdi, Pavel Zhukov, Alexander Else, Giovanni Ruggiero, Rick "Technoweenie", Daniel Lundin, Dave Hoover, Simon Jefford, Benjamin Peterson, Justin Case, Devon Weller, Richard Smith, Alexander Morland, Wadim Grasza, Michael Jakl, and Zed Shaw for their contributions, and to Stathis Sideris for [Ditaa](http://www.ditaa.org).
+
+Please use the [issue tracker](https://github.com/imatix/zguide/issues) for all comments and errata. This version covers the latest stable release of 0MQ and was published on Mon 10 October, 2011.
+
+The Guide is mainly [in C](http://zguide.zeromq.org/page:all), but also in [PHP](http://zguide.zeromq.org/php:all) and [Lua](http://zguide.zeromq.org/lua:all).
+
+---
+
+This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 License](http://creativecommons.org/licenses/by-sa/3.0/).
+
 ## 第一章 ZeroMQ基础
 
 ### 拯救世界
@@ -98,30 +114,7 @@ int main (void)
 }
 ```
 
-```
-          +------------+
-          |            |
-          |   Client   |
-          |            |
-          +------------+
-          |    REQ     |
-          \---+--------/
-              |    ^
-              |    |
-         "Hello"  "World"
-              |    |
-              v    |
-          /--------+---\
-          |    REP     |
-          +------------+
-          |            |
-          |   Server   |
-          |            |
-          +------------+
-
-
-     Figure # - Request-Reply
-```
+![1](images/chapter1_1.png)
 
 使用REQ-REP套接字发送和接受消息是需要遵循一定规律的。客户端首先使用zmq_send()发送消息，再用zmq_recv()接收，如此循环。如果打乱了这个顺序（如连续发送两次）则会报错。类似地，服务端必须先进行接收，后进行发送。
 
@@ -244,27 +237,7 @@ int main (void)
 
 这看起来是否太简单了？ZMQ就是这样一个东西，你往里加点儿料就能制作出一枚无穷能量的原子弹，用它来拯救世界吧！
 
-```
- +------------+        +------------+
- |            |        |            | Zap!
- | TCP socket +------->| 0MQ socket |
- |            | BOOM!  |     cC00   |  POW!!
- +------------+        +------------+
-   ^    ^    ^
-   |    |    |
-   |    |    +---------+
-   |    |              |
-   |    +----------+   |
-  Illegal          |   |
-  radioisotopes    |   |
-  from secret      |   |
-  Soviet atomic    | Spandex
-  city             |
-               Cosmic rays
-
-
-    Figure # - A terrible accident...
-```
+![2](images/chapter1_2.png)
 
 理论上你可以连接千万个客户端到这个服务端上，同时连接都没问题，程序仍会运作得很好。你可以尝试一下先打开客户端，再打开服务端，可以看到程序仍然会正常工作，想想这意味着什么。
 
@@ -290,14 +263,7 @@ socket.send ("Hello")
 
 实际发送的消息是：
 
-```
-+-----+    +-----+-----+-----+-----+-----+
-|  5  |    |  H  |  e  |  l  |  l  |  o  |
-+-----+    +-----+-----+-----+-----+-----+
-
-
-          Figure # - A 0MQ string
-```
+![3](images/chapter1_3.png)
 
 如果你从C语言中读取该消息，你会读到一个类似于字符串的内容，甚至它可能就是一个字符串（第六位在内存中正好是一个空字符），但是这并不合适。这样一来，客户端和服务端对字符串的定义就不统一了，你会得到一些奇怪的结果。
 
@@ -395,37 +361,7 @@ int main (void)
 
 这项更新服务没有开始、没有结束，就像永不消失的电波一样。
 
-```
-                 +-------------+
-                 |             |
-                 |  Publisher  |
-                 |             |
-                 +-------------+
-                 |     PUB     |
-                 \-------------/
-                      bind
-                        |
-                        |
-                     updates
-                        |
-        +---------------+---------------+
-        |               |               |
-     updates         updates         updates
-        |               |               |
-        |               |               |
-        v               v               v
-     connect         connect         connect
-  /------------\  /------------\  /------------\
-  |    SUB     |  |    SUB     |  |    SUB     |
-  +------------+  +------------+  +------------+
-  |            |  |            |  |            |
-  | Subscriber |  | Subscriber |  | Subscriber |
-  |            |  |            |  |            |
-  +------------+  +------------+  +------------+
-
-
-           Figure # - Publish-Subscribe
-```
+![4](images/chapter1_4.png)
 
 下面是客户端程序，它会接受发布者的消息，只处理特定邮编标注的信息，如纽约的邮编是10001:
 
@@ -576,50 +512,7 @@ int main (void)
 }
 ```
 
-```
-                  +-------------+
-                  |             |
-                  |  Ventilator |
-                  |             |
-                  +-------------+
-                  |    PUSH     |
-                  \------+------/
-                         |
-                       tasks
-                         |
-         +---------------+---------------+
-         |               |               |
-       task            task             task
-         |               |               |
-         v               v               v
-   /------------\  /------------\  /------------\
-   |    PULL    |  |    PULL    |  |    PULL    |
-   +------------+  +------------+  +------------+
-   |            |  |            |  |            |
-   |   Worker   |  |   Worker   |  |   Worker   |
-   |            |  |            |  |            |
-   +------------+  +------------+  +------------+
-   |    PUSH    |  |    PUSH    |  |    PUSH    |
-   \-----+------/  \-----+------/  \-----+------/
-         |               |               |
-       result          result          result
-         |               |               |
-         +---------------+---------------+
-                         |
-                      results
-                         |
-                         v
-                  /-------------\
-                  |    PULL     |
-                  +-------------+
-                  |             |
-                  |    Sink     |
-                  |             |
-                  +-------------+
-
-
-           Figure # - Parallel Pipeline
-```
+![5](images/chapter1_5.png)
 
 下面是worker的代码，它接受信息并延迟指定的毫秒数，并发送执行完毕的信号：
 
@@ -736,26 +629,7 @@ Total elapsed time: 1018 msec
 
 * 结果收集器的PULL套接字会均匀地从worker处收集消息，这种机制称为_公平队列_：
 
-```
-  +---------+   +---------+   +---------+
-  |  PUSH   |   |  PUSH   |   |  PUSH   |
-  \----+----/   \----+----/   \----+----/
-       |             |             |
-   R1, R2, R3       R4           R5, R6
-       |             |             |
-       +-------------+-------------+
-                     |
-               fair-queuing
-           R1, R4, R5, R2, R6, R3
-                     |
-                     v
-              /-------------\
-              |     PULL    |
-              +-------------+
-
-
-          Figure # - Fair queuing
-```
+![6](images/chapter1_6.png)
 
 管道模式也会出现慢连接的情况，让人误以为PUSH套接字没有进行负载均衡。如果你的程序中某个worker接收到了更多的请求，那是因为它的PULL套接字连接得比较快，从而在别的worker连接之前获取了额外的消息。
 
@@ -949,26 +823,7 @@ ZMQ应用程序的一开始总是会先创建一个上下文，并用它来创�
 
 我们可以找一个开源软件来做例子，如[Hadoop Zookeeper](http://hadoop.apache.org/zookeeper/)，看一下它的C语言API源码，[src/c/src/zookeeper.c]([http://github.com/apache/zookeeper/blob/trunk/src/c/src/zookeeper.c src/c/src/zookeeper.c)。这段代码大约有3200行，没有注释，实现了一个C/S网络通信协议。它工作起来很高效，因为使用了poll()来代替select()。但是，Zookeeper应该被抽象出来，作为一种通用的消息通信层，并加以详细的注释。像这样的模块应该得到最大程度上的复用，而不是重复地制造轮子。
 
-```
-             +------------+
-             |            |
-             |  Piece A   |
-             |            |
-             +------------+
-                   ^
-                   |
-                  TCP
-                   |
-                   v
-             +------------+
-             |            |
-             |  Piece B   |
-             |            |
-             +------------+
-
-
-  Figure # - Messaging as it starts
-```
+![7](images/chapter1_7.png)
 
 但是，如何编写这样一个可复用的消息层呢？为什么长久以来人们宁愿在自己的代码中重复书写控制原始TCP套接字的代码，而不愿编写这样一个公共库呢？
 
@@ -980,36 +835,7 @@ ZMQ应用程序的一开始总是会先创建一个上下文，并用它来创�
 
 这样一来，中小应用程序的开发者们就无计可施了。他们只能设法避免编写网络应用程序，转而编写那些不需要扩展的程序；或者可以使用原始的方式进行网络编程，但编写的软件会非常脆弱和复杂，难以维护；亦或者他们选择一种消息通信产品，虽然能够开发出扩展性强的应用程序，但需要支付高昂的代价。似乎没有一种选择是合理的，这也是为什么在上个世纪消息系统会成为一个广泛的问题。
 
-```
-            +---+          |  +---+
-    +---+   |   |   +---+  |  |   |
-    |   +-->|   |   |   |  |  |   |
-    |   |   +---+   |   |  |  +-+-+
-    +-+-+           +-+-+  |    |
-      |               |    |    |
-      |       +-----------------+
-      |       |       |    |
-      +-----------------------+
-              |       |    |  |
-      +-------|-------|----+--|------+
-      |       v       |       v      |
-    +-+-+   +---+     |     +---+    |
-    |   |   |   |   +-+-+   |   |    |
-    |   |   |   |   |   |   |   |    |
-    +---+   +---+   |   |   +---+    |
-              ^     +---+     ^      |
-              |       ^       |    +-+
-      +-------+-------+-------+    |
-      |       |       |            |
-      v     +-+-+     v     +---+  |
-    +---+   |   |   +---+   |   |  |
-    |   |   |   |<--+   |   |   |<-+
-    |   |   +---+   |   |   +-+-+
-    +---+           +---+
-
-
-   Figure # - Messaging as it becomes
-```
+![8](images/chapter1_8.png)
 
 我们真正需要的是这样一种消息软件，它能够做大型消息软件所能做的一切，但使用起来又非常简单，成本很低，可以用到所有的应用程序中，没有任何依赖条件。因为没有了额外的模块，就降低了出错的概率。这种软件需要能够在所有的操作系统上运行，并能支持所有的编程语言。
 
@@ -1063,135 +889,7 @@ wuclient 56789 &
 
 在编写ZMQ应用程序时，你遇到最多的问题可能是无法获得消息。下面有一个问题解决路线图，列举了最基本的出错原因。不用担心其中的某些术语你没有见过，在后面的几章里都会讲到。
 
-```
-        +-----------------+
-        |                 |
-        | I'm not getting |
-        |     my data!    |
-        |             {o} |
-        +--------+--------+
-                 |
-                 |
-                 v
-        +-----------------+        +-----------------+        +------------------+
-        |                 |        |                 |        | Use the          |
-        | Are you losing  |        |  Do you set a   |        | zmq_setsockopt   |
-        |  messages in a  +------->|  subscription   +------->| ZMQ_SUBSCRIBE    |
-        |   SUB socket?   | Yes    |  for messages?  | No     | ("") option      |
-        |             {o} |        |             {o} |        |                  |
-        +--------+--------+        +--------+--------+        +------------------+
-                 | No                       | Yes
-                 |                          |
-                 |                          v
-                 |                 +-----------------+        +------------------+
-                 |                 |                 |        | Start all SUB    |
-                 |                 |  Do you start   |        | sockets first,   |
-                 |                 |  the SUB socket +------->| then the PUB     |
-                 |                 |  after the PUB? | No     | sockets to avoid |
-                 |                 |             {o} |        | loss             |
-                 |                 +--------+--------+        +------------------+
-                 |                          | Yes
-                 |                          |
-                 |                          v
-                 |              +-------------------------+
-                 |              |  See explanation of the |
-                 |              | "slow joiner" syndrome  |
-                 |              |  syndrome in this text. |
-                 |              +-------------------------+
-                 |
-                 |
-                 v
-        +-----------------+        +--------------------+
-        |                 |        | With REQ, send and |
-        |  Are you using  |        | recv in a loop and |
-        |   REQ and REP   +------->| check the return   |
-        |     sockets?    | Yes    | codes. With REP    |
-        |             {o} |        | it's recv + send.  |
-        +--------+--------+        +--------------------+
-                 | No
-                 |
-                 v
-        +-----------------+        +---------------------+        +-----------------+
-        |                 |        | The 1st PULL socket |        | You may need to |
-        |  Are you using  |        | to connect can grab |        | do extra work to|
-        |  PUSH sockets?  +------->| 1000's of messages  +------->| synchronize your|
-        |                 | Yes    | before the others   |        | sockets before  |
-        |             {o} |        | get there.          |        | sending tasks.  |
-        +--------+--------+        +---------------------+        +-----------------+
-                 | No
-                 |
-                 v
-        +-----------------+        +-----------------+
-        |                 |        |                 |
-        |  Do you check   |        | Check every 0MQ |
-        | return codes on +------->| method call. In |
-        |  all methods?   | No     | C, use asserts. |
-        |             {o} |        |                 |
-        +--------+--------+        +-----------------+
-                 | Yes
-                 |
-                 v
-        +-----------------+        +-----------------+        +------------------+
-        |                 |        |                 |        |                  |
-        | Are you using   |        |   Do you pass   |        | Create a socket  |
-        | threads in your +------->| sockets between +------->| in the thread    |
-        |  app already?   | Yes    |    threads?     | Yes    | where you use it |
-        |             {o} |        |             {o} |        |                  |
-        +--------+--------+        +--------+--------+        +------------------+
-                 | No                       | No
-                 +--------------------------+
-                 |
-                 v
-        +-----------------+        +-----------------+        +------------------+
-        |                 |        |                 |        |                  |
-        |  Are you using  |        | Are you calling |        | Call zmq_init    |
-        |   the inproc    +------->|  zmq_init more  +------->| exactly once in  |
-        |   transport?    | Yes    |    than once?   | Yes    | every process.   |
-        |             {o} |        |             {o} |        |                  |
-        +--------+--------+        +--------+--------+        +------------------+
-                 | No                       | No
-                 |                          |
-                 |                          v
-                 |                 +-----------------+
-                 |                 |                 |
-                 |                 | Check that you  |
-                 |                 | bind before you |
-                 |                 | connect.        |
-                 |                 |                 |
-                 |                 +-----------------+
-                 |
-                 v
-        +-----------------+        +-----------------+        +-----------------+
-        |                 |        | Check that the  |        | If you're using |
-        |  Are you using  |        | reply address   |        | identities make |
-        | ROUTER sockets? +------->| is valid. 0MQ   +------->| sure to set them|
-        |                 | Yes    | drops messages  |        | before not after|
-        |             {o} |        | it can't route. |        | you connect.    |
-        +--------+--------+        +-----------------+        +--------+--------+
-                 | No
-                 |
-                 v
-        +-----------------+        +--------------------+
-        |                 |        | You probably have  |
-        | Are you losing  |        | a client running   |
-        |   one message   +------->| in the background. |
-        |    in two?      | Yes    | Kill it and start  |
-        |             {o} |        | again.             |
-        +--------+--------+        +--------------------+
-                 | No
-                 |
-                 v
-        +-----------------+
-        |                 |
-        | Make a minimal  |
-        | test case, ask  |
-        | on zeromq IRC.  |
-        |                 |
-        +-----------------+
-
-
-                 Figure # - Missing Message Problem Solver
-```
+![9](images/chapter1_9.png)
 
 如果ZMQ在你的应用程序中扮演非常重要的角色，那你可能就需要好好计划一下了。首先，创建一个原型，用以测试设计方案的可行性。采取一些压力测试的手段，确保它足够的健壮。其次，主攻测试代码，也就是编写测试框架，保证有足够的电力供应和时间，来进行高强度的测试。理想状态下，应该由一个团队编写程序，另一个团队负责击垮它。最后，让你的公司及时[联系iMatix](http://www.imatix.com/contact)，获得技术上的支持。
 
