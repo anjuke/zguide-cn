@@ -1,0 +1,129 @@
+Index: src/org/stathissideris/ascii2image/graphics/Diagram.java
+===================================================================
+--- src/org/stathissideris/ascii2image/graphics/Diagram.java	(revision 80)
++++ src/org/stathissideris/ascii2image/graphics/Diagram.java	(working copy)
+@@ -30,6 +30,7 @@
+ import org.stathissideris.ascii2image.core.Pair;
+ import org.stathissideris.ascii2image.text.AbstractionGrid;
+ import org.stathissideris.ascii2image.text.CellSet;
++import org.stathissideris.ascii2image.text.StringUtils;
+ import org.stathissideris.ascii2image.text.TextGrid;
+ import org.stathissideris.ascii2image.text.TextGrid.Cell;
+ import org.stathissideris.ascii2image.text.TextGrid.CellColorPair;
+@@ -42,8 +43,8 @@
+  */
+ public class Diagram {
+ 
+-	private static final boolean DEBUG = true;
+-	private static final boolean DEBUG_VERBOSE = true;
++	private static final boolean DEBUG = false;
++	private static final boolean DEBUG_VERBOSE = false;
+ 	private static final boolean DEBUG_MAKE_SHAPES = false;
+ 
+ 	private ArrayList<DiagramShape> shapes = new ArrayList<DiagramShape>();
+@@ -544,7 +545,8 @@
+ 				String string = pair.string;
+ 				if (DEBUG)
+ 					System.out.println("Found string "+string);
+-				TextGrid.Cell lastCell = isolationGrid.new Cell(cell.x + string.length() - 1, cell.y);
++				//TextGrid.Cell lastCell = isolationGrid.new Cell(cell.x + string.length() - 1, cell.y);
++				TextGrid.Cell lastCell = isolationGrid.new Cell(cell.x + StringUtils.GBKLength(string) - 1, cell.y);
+ 			
+ 				int minX = getCellMinX(cell);
+ 				int y = getCellMaxY(cell);
+Index: src/org/stathissideris/ascii2image/text/StringUtils.java
+===================================================================
+--- src/org/stathissideris/ascii2image/text/StringUtils.java	(revision 80)
++++ src/org/stathissideris/ascii2image/text/StringUtils.java	(working copy)
+@@ -20,6 +20,8 @@
+  */
+ package org.stathissideris.ascii2image.text;
+ 
++import java.nio.charset.Charset;
++
+ /**
+  * @author sideris
+  *
+@@ -28,6 +30,10 @@
+  */
+ public class StringUtils {
+ 
++	public static int GBKLength(String str) {
++		return str.getBytes(Charset.forName("GBK")).length;
++	}
++
+ 	/**
+ 	 * The indexOf idiom
+ 	 * 
+Index: src/org/stathissideris/ascii2image/text/TextGrid.java
+===================================================================
+--- src/org/stathissideris/ascii2image/text/TextGrid.java	(revision 80)
++++ src/org/stathissideris/ascii2image/text/TextGrid.java	(working copy)
+@@ -22,6 +22,7 @@
+ 
+ import java.awt.Color;
+ import java.io.*;
++import java.nio.charset.Charset;
+ import java.util.*;
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+@@ -1563,6 +1564,25 @@
+ 				byte[] bytes = row.getBytes();
+ 				row = new String(bytes, encoding);
+ 			}
++
++            StringBuilder builder = new StringBuilder(row.length());
++
++            int q = 0;
++            for (int p = 0; p < row.length(); p++) {
++                char ch = row.charAt(p);
++                if (Character.isWhitespace(ch) || StringUtils.isOneOf(ch, boundaries)) {
++                    if (q > 0) {
++                        builder.append(StringUtils.repeatString(" ", q));
++                    }
++                    q = 0;
++                } else if (ch > 255) {
++                    q++;
++                }
++                builder.append(ch);
++            }
++
++            row = builder.toString();
++
+ 			if(row.length() > maxLength) maxLength = row.length();
+ 			rows.set(index, new StringBuilder(row));
+ 			index++;
+Index: src/org/stathissideris/ascii2image/core/HTMLConverter.java
+===================================================================
+--- src/org/stathissideris/ascii2image/core/HTMLConverter.java	(revision 80)
++++ src/org/stathissideris/ascii2image/core/HTMLConverter.java	(working copy)
+@@ -139,7 +139,7 @@
+ 		}
+ 		
+ 		if(diagramList.isEmpty()){
+-			System.out.println("\nHTML document does not contain any " ++			System.out.println("\nHTML document does not contain any " +
+ 				"<pre> tags with their class attribute set to \""+TAG_CLASS+"\". Nothing to do.");
+ 			
+ 			//TODO: should return the method with appropriate exit code instead
+@@ -163,7 +163,9 @@
+ 		
+ 		System.out.println("Generating diagrams... ");
+ 		
+-		File imageDir = new File(new File(targetFilename).getParent() + File.separator + imageDirName);
++        String imagesParent = new File(targetFilename).getAbsoluteFile().getParent();
++		File imageDir = new File(imagesParent + File.separator + imageDirName);
++
+ 		if(!imageDir.exists()){
+ 			if(!imageDir.mkdir()){
+ 				System.err.println("Could not create directory " + imageDirName);
+@@ -173,9 +175,9 @@
+ 		
+ 		for(String URL : diagramList.keySet()) {
+ 			String text = (String) diagramList.get(URL);
+-			String imageFilename = new File(targetFilename).getParent() + File.separator + URL;
++			String imageFilename = imagesParent + File.separator + URL;
+ 			if(new File(imageFilename).exists() && !options.processingOptions.overwriteFiles()){
+-				System.out.println("Error: Cannot overwrite file "+URL+", file already exists." ++				System.out.println("Error: Cannot overwrite file "+URL+", file already exists." +
+ 					" Use the --overwrite option if you would like to allow file overwrite.");
+ 				continue;
+ 			}
