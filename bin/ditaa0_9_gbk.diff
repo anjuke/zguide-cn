@@ -67,7 +67,7 @@ Index: src/org/stathissideris/ascii2image/text/TextGrid.java
  import java.util.*;
  import java.util.regex.Matcher;
  import java.util.regex.Pattern;
-@@ -1563,6 +1564,25 @@
+@@ -1563,6 +1564,26 @@
  				byte[] bytes = row.getBytes();
  				row = new String(bytes, encoding);
  			}
@@ -77,7 +77,8 @@ Index: src/org/stathissideris/ascii2image/text/TextGrid.java
 +            int q = 0;
 +            for (int p = 0; p < row.length(); p++) {
 +                char ch = row.charAt(p);
-+                if (Character.isWhitespace(ch) || StringUtils.isOneOf(ch, boundaries)) {
++                if (StringUtils.isOneOf(ch, boundaries)
++                        || StringUtils.isOneOf(ch, cornerChars)) {
 +                    if (q > 0) {
 +                        builder.append(StringUtils.repeatString(" ", q));
 +                    }
