@@ -1,6 +1,6 @@
 # ZMQ 指南
 
-**作者: Pieter Hintjens <ph@imatix.com>, CEO iMatix Corporation.**  
+**作者: Pieter Hintjens <ph@imatix.com>, CEO iMatix Corporation.**
 **翻译: 张吉 <jizhang@anjuke.com>, 安居客集团 好租网工程师**
 
 ---
@@ -12,11 +12,11 @@
 * [第五章 高级发布-订阅模式][5]
 
 
-  [1]: https://github.com/haozu/zguide-cn/blob/master/chapter1.md
-  [2]: https://github.com/haozu/zguide-cn/blob/master/chapter2.md
-  [3]: https://github.com/haozu/zguide-cn/blob/master/chapter3.md
-  [4]: https://github.com/haozu/zguide-cn/blob/master/chapter4.md
-  [5]: https://github.com/haozu/zguide-cn/blob/master/chapter5.md
+  [1]: /chapter1.md
+  [2]: /chapter2.md
+  [3]: /chapter3.md
+  [4]: /chapter4.md
+  [5]: /chapter5.md
 
 ---
 
