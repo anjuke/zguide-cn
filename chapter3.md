@@ -43,7 +43,7 @@
 
 当你用REQ套接字去连接ROUTER套接字，并发送一条请求消息，你会从ROUTER中获得一条如下所示的消息：
 
-![1](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_1.png)
+![1](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_1.png)
 
 * 第三帧是应用程序发送给REQ套接字的消息；
 * 第二帧的空信息是REQ套接字在发送消息给ROUTER之前添加的；
@@ -51,7 +51,7 @@
 
 如果我们在一条装置链路上传递该消息，最终会得到包含多层信封的消息。最新的信封会在消息的顶部。
 
-![2](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_2.png)
+![2](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_2.png)
 
 以下将详述我们在请求-应答模式中使用到的四种套接字类型：
 
@@ -69,11 +69,11 @@ REP要求消息中的信封由一个空帧结束，所以如果你没有用REQ�
 
 这是一个瞬时的套接字，ROUTER会自动生成一个UUID来标识消息的来源。
 
-![3](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_3.png)
+![3](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_3.png)
 
 这是一个持久的套接字，标识由消息来源自己指定。
 
-![4](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_4.png)
+![4](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_4.png)
 
 下面让我们在实例中观察上述两种操作。下列程序会打印出ROUTER从两个REP套接字中获得的消息，其中一个没有指定标识，另一个指定了“Hello”作为标识。
 
@@ -176,7 +176,7 @@ ROUTER-DEALER路由可以用来做什么呢？如果DEALER会将它完成任务�
 
 下面例子中的两个DEALER不会返回消息给ROUTER，我们的路由采用加权随机算法：发送两倍多的信息给其中的一个DEALER。
 
-![5](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_5.png)
+![5](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_5.png)
 
 **rtdealer.c**
 
@@ -287,7 +287,7 @@ int main (void)
 
 在将消息路由给DEALER时，我们手工建立了这样一个信封：
 
-![6](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_6.png)
+![6](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_6.png)
 
 ROUTER套接字会移除第一帧，只将第二帧的内容传递给相应的DEALER。当DEALER发送消息给ROUTER时，只会发送一帧，ROUTER会在外层包裹一个信封（添加第一帧），返回给我们。
 
@@ -309,7 +309,7 @@ DEALER的工作方式就像是PUSH和PULL的结合。但是，我们不能用PUL
 
 和DEALER相同，REQ只能和一个ROUTER连接，除非你想做类似多路冗余路由这样的事（我甚至不想在这里解释），其复杂度会超过你的想象并迫使你放弃的。
 
-![7](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_7.png)
+![7](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_7.png)
 
 ROUTER-REQ模式可以用来做什么？最常用的做法久是最近最少使用算法（LRU）路由了，ROUTER发出的请求会让等待最久的REQ来处理。请看示例：
 
@@ -428,7 +428,7 @@ Processed: 10 tasks
 
 在将消息路由给REQ套接字时，需要注意一定的格式，即地址-空帧-消息：
 
-![8](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_8.png)
+![8](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_8.png)
 
 ### 使用地址进行路由
 
@@ -445,7 +445,7 @@ REP套接字有两个特点：
 
 ØMQ的核心理念之一是周边的节点应该尽可能的智能，且数量众多，而中间件则是固定和简单的。这就意味着周边节点可以向其他特定的节点发送消息，比如可以连接到一个特定的REP。这里我们先不讨论如何在多个节点之间进行路由，只看最后一步中ROUTER如何和特定的REP通信的。
 
-![9](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_9.png)
+![9](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_9.png)
 
 这张图描述了以下事件：
 
@@ -533,7 +533,7 @@ int main (void)
 
 要将消息路由给REP，我们需要创建它能辨别的信封：
 
-![10](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_10.png)
+![10](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_10.png)
 
 ### 请求-应答模式下的消息代理
 
@@ -541,7 +541,7 @@ int main (void)
 
 首先让我们回顾一下经典的请求-应答模型，尝试用它建立一个不断增长的巨型服务网络。最基本的请求-应答模型是：
 
-![11](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_11.png)
+![11](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_11.png)
 
 这个模型支持多个REP套接字，但如果我们想支持多个REQ套接字，就需要增加一个中间件，它通常是ROUTER和DEALER的结合体，简单将两个套接字之间的信息进行搬运，因此可以用现成的ZMQ_QUEUE装置来实现：
 
@@ -578,7 +578,7 @@ Figure # - Stretched request-reply
 
 上述结构中，对REP的路由我们使用了DEADER自带的负载均衡算法。但是，我们想用LRU算法来进行路由，这就要用到ROUTER-REP模式：
 
-![12](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_12.png)
+![12](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_12.png)
 
 这个ROUTER-ROUTER的LRU队列不能简单地在两个套接字间搬运消息，以下代码会比较复杂，不过在请求-应答模式中复用性很高。
 
@@ -759,19 +759,19 @@ int main (void)
 
 现在我们就将完整的请求-应答流程走一遍，我们将client套接字的标识设为“CLIENT”，worker的设为“WORKER”。以下是client发送的消息：
 
-![13](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_13.png)
+![13](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_13.png)
 
 代理从ROUTER中获取到的消息格式如下：
 
-![14](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_14.png)
+![14](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_14.png)
 
 代理会从LRU队列中获取一个空闲woker的地址，作为信封附加在消息之上，传送给ROUTER。注意要添加一个空帧。
 
-![15](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_15.png)
+![15](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_15.png)
 
 REQ（worker）收到消息时，会将信封和空帧移去：
 
-![16](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_16.png)
+![16](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_16.png)
 
 可以看到，worker收到的消息和client端ROUTER收到的消息是一致的。worker需要将该消息中的信封保存起来，只对消息内容做操作。
 
@@ -1212,7 +1212,7 @@ int main (void)
 
 在之前的ROUTER-DEALER模型中，我们看到了client是如何异步地和多个worker进行通信的。我们可以将这个结构倒置过来，实现多个client异步地和单个server进行通信：
 
-![17](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_17.png)
+![17](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_17.png)
 
 * client连接至server并发送请求；
 * 每一次收到请求，server会发送0至N个应答；
@@ -1369,7 +1369,7 @@ int main (void)
 
 这段代码的整体架构如下图所示：
 
-![18](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_18.png)
+![18](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_18.png)
 
 可以看到，client和server之间的连接我们使用的是DEALER-ROUTER，而server和worker的连接则用了DEALER-DEALER。如果worker是一个同步的线程，我们可以用REP。但是本例中worker需要能够发送多个应答，所以就需要使用DEALER这样的异步套接字。这里我们不需要对应答进行路由，因为所有的worker都是连接到一个server上的。
 
@@ -1433,13 +1433,13 @@ worker和client是同步的，我们使用LRU算法来给worker分配任务。�
 
 鉴于上文提过的原因，client和worker是不会直接通信的，这样一来就无法动态地添加和删除节点了。所以，我们的基础模型会使用一个请求-应答模式中使用过的代理结构。
 
-![19](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_19.png)
+![19](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_19.png)
 
 #### 多个集群的架构
 
 下面我们将集群扩充到多个，每个集群有自己的一组client和worker，并使用代理相连接：
 
-![20](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_20.png)
+![20](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_20.png)
 
 问题在于：我们如何让一个集群的client和另一个集群的worker进行通信呢？有这样几种解决方案，我们来看看他们的优劣：
 
@@ -1451,13 +1451,13 @@ worker和client是同步的，我们使用LRU算法来给worker分配任务。�
 
 我们首先看看方案1，worker同时和多个代理进行通信：
 
-![21](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_21.png)
+![21](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_21.png)
 
 这看上去很灵活，但却没有提供我们所需要的特性：client只有当集群中的worker不可用时才会去请求异地的worker。此外，worker的“已就绪”信号会同时发送给两个代理，这样就有可能同时获得两份任务。这个方案的失败还有一个原因：我们又将路由逻辑放在了边缘地带。
 
 那来看看方案2，我们为各个代理建立连接，不修改worker和client：
 
-![22](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_22.png)
+![22](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_22.png)
 
 这种设计的优势在于，我们只需要在一个地方解决问题就可以了，其他地方不需要修改。这就好像代理之间会秘密通信：伙计，我这儿有一些剩余的劳动力，如果你那儿忙不过来就跟我说，价钱好商量。
 
@@ -1483,7 +1483,7 @@ worker和client是同步的，我们使用LRU算法来给worker分配任务。�
 
 最简单的方式称为联邦，即代理充当其他代理的client和worker。我们可以将代理的前端套接字连接至其他代理的后端套接字，反之亦然。提示一下，ZMQ中是可以将一个套接字绑定到一个端点，同时又连接至另一个端点的。
 
-![23](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_23.png)
+![23](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_23.png)
 
 这种架构的逻辑会比较简单：当代理没有client时，它会告诉其他代理自己准备好了，并接收一个任务进行处理。但问题在于这种机制太简单了，联邦模式下的代理一次只能处理一个请求。如果client和worker是严格同步的，那么代理中的其他空闲worker将分配不到任务。我们需要的代理应该具备完全异步的特性。
 
@@ -1523,7 +1523,7 @@ worker和client是同步的，我们使用LRU算法来给worker分配任务。�
 
 以下是代理程序的套接字分布图：
 
-![24](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_24.png)
+![24](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_24.png)
 
 请注意，我们会将cloudbe连接至其他代理的cloudfe，也会将statebe连接至其他代理的statefe。
 
@@ -1531,7 +1531,7 @@ worker和client是同步的，我们使用LRU算法来给worker分配任务。�
 
 由于每个消息流都有其巧妙之处，所以我们不会直接把所有的代码都写出来，而是分段编写和测试。当每个消息流都能正常工作了，我们再将其拼装成一个完整的应用程序。我们首先从状态流开始：
 
-![25](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_25.png)
+![25](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_25.png)
 
 代码如下：
 
@@ -1632,7 +1632,7 @@ peering1 DC3 DC1 DC2  #  Start DC3 and connect to DC1 and DC2
 
 下面让我们建立本地流和云端流的原型。这段代码会从client获取请求，并随机地分派给集群内的worker或其他集群。
 
-![26](https://github.com/haozu/zguide-cn/raw/master/images/chapter3_26.png)
+![26](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_26.png)
 
 在编写代码之前，让我们先描绘一下核心的路由逻辑，整理出一份简单而健壮的设计。
 

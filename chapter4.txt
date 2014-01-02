@@ -1,5 +1,5 @@
 .- vim: set filetype=markdown:
-.set GIT=https://github.com/haozu/zguide-cn
+.set GIT=https://github.com/anjuke/zguide-cn
 
 ## 可靠的请求-应答模式
 

@@ -1,5 +1,5 @@
 .- vim: set filetype=markdown:
-.set GIT=https://github.com/haozu/zguide-cn
+.set GIT=https://github.com/anjuke/zguide-cn
 
 ## 第五章 高级发布-订阅模式
 

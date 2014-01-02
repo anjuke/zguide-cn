@@ -139,7 +139,7 @@ int main (void)
 
 这样一来，订阅者看上去就像是一个队列装置，我们可以用各种方式去连接队列装置和worker。如我们建立单向的通信，每个worker都是相同的，可以使用PUSH和PULL套接字，分发的工作就交给ZMQ吧。这是最简单也是最快速的方式：
 
-![1](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_1.png)
+![1](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_1.png)
 
 订阅者和发布者之间的通信使用TCP或PGM协议，订阅者和worker的通信由于是在同一个进程中完成的，所以使用inproc协议。
 
@@ -148,7 +148,7 @@ int main (void)
 很多高性能产品使用的方案是分片，就是将工作量拆分成独立并行的流。如，一半的专题数据由一个流媒体传输，另一半由另一个流媒体传输。我们可以建立更多的流媒体，但如果CPU核心数不变，那就没有必要了。
 让我们看看如何将工作量分片为两个流：
 
-![2](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_2.png)
+![2](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_2.png)
 
 要让两个流全速工作，需要这样配置ZMQ：
 
@@ -200,7 +200,7 @@ int main (void)
 
 我们会分阶段实施克隆模式。首先，我们看看如何从服务器发送键值更新事件给所有的客户端。我们将第一章中使用的天气服务模型进行改造，以键值对的方式发送信息，并让客户端使用哈希表来保存：
 
-![3](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_3.png)
+![3](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_3.png)
 
 以下是服务端代码：
 
@@ -707,7 +707,7 @@ kvmsg_test (int verbose)
 
 为了让后续连接的（或从故障中恢复的）客户端能够获取服务器上的状态信息，需要让它在连接时获取一份快照。正如我们将“消息”的概念简化为“已编号的键值对”，我们也可以将“状态”简化为“一个哈希表”。为获取服务端状态，客户端会打开一个REQ套接字进行请求：
 
-![4](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_4.png)
+![4](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_4.png)
 
 我们需要考虑时间的问题，因为生成快照是需要一定时间的，我们需要知道应从哪个更新事件开始更新快照，服务端是不知道何时有更新事件的。一种方法是先开始订阅消息，收到第一个消息之后向服务端请求“将该条更新之前的所有内容发送给”。这样一来，服务器需要为每一次更新保存一份快照，这显然是不现实的。
 
@@ -926,7 +926,7 @@ int main (void)
 
 客户端的键值更新事件会通过PUSH-PULL套接字传达给服务端：
 
-![5](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_5.png)
+![5](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_5.png)
 
 我们为什么不让客户端直接将更新信息发送给其他客户端呢？虽然这样做可以减少延迟，但是就无法为更新事件添加自增的唯一编号了。很多应用程序都需要更新事件以某种方式排序，只有将消息发给服务端，由服务端分发更新消息，才能保证更新事件的顺序。
 
@@ -2209,7 +2209,7 @@ s_flush_single (char *key, void *data, void *args)
 
 我们可以将客户端状态图绘制出来：
 
-![6](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_6.png)
+![6](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_6.png)
 
 故障恢复的步骤如下：
   * 客户端检测到主机不再发送心跳，因此转而连接备机，并请求一份新的快照；
@@ -2226,7 +2226,7 @@ s_flush_single (char *key, void *data, void *args)
 
 下面是整体架构图：
 
-![7](https://github.com/haozu/zguide-cn/raw/master/images/chapter5_7.png)
+![7](https://github.com/anjuke/zguide-cn/raw/master/images/chapter5_7.png)
 
 开始编程之前，我们需要将客户端重构成一个可复用的类。在ZMQ中写异步类有时是为了练习如何写出优雅的代码，但这里我们确实是希望克隆模式可以成为一种易于使用的程序。上述架构的伸缩性来源于客户端的正确行为，因此有必要将其封装成一份API。要在客户端中进行故障恢复还是比较复杂的，试想一下自由者模式和克隆模式结合起来会是什么样的吧。
 
