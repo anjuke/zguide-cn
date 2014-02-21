@@ -2313,7 +2313,7 @@ int main (void)
 
 关于阈值：
 
-* 这个选项会同时影响套接字的发送和接收队列。当然，PUB、PUSH不会有接收队列，SUB、PULL、REQ、REP不会有接收队列。而像DEALER、ROUTER、PAIR套接字时，他们既有发送队列，又有接收队列。
+* 这个选项会同时影响套接字的发送和接收队列。当然，PUB、PUSH不会有接收队列，SUB、PULL、REQ、REP不会有发送队列。而像DEALER、ROUTER、PAIR套接字时，他们既有发送队列，又有接收队列。
 
 * 当套接字达到阈值时，ZMQ会发生阻塞，或直接丢弃消息。
 
