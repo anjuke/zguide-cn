@@ -2,6 +2,8 @@
 
 **作者: Pieter Hintjens <ph@imatix.com>, CEO iMatix Corporation.**
 
+**原文地址: https://github.com/imatix/zguide/tree/v2.2**
+
 **翻译: 张吉 <jizhang@anjuke.com>, 安居客集团 好租网工程师**
 
 **NOTE**: 此翻译涵盖2011年10月份的ZMQ稳定版本，即2.1.0 stable release。但读者仍然可以通过此文了解ZMQ的一些基本概念和哲学。
