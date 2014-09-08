@@ -311,7 +311,7 @@ DEALER的工作方式就像是PUSH和PULL的结合。但是，我们不能用PUL
 
 ![7](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_7.png)
 
-ROUTER-REQ模式可以用来做什么？最常用的做法久是最近最少使用算法（LRU）路由了，ROUTER发出的请求会让等待最久的REQ来处理。请看示例：
+ROUTER-REQ模式可以用来做什么？最常用的做法就是最近最少使用算法（LRU）路由了，ROUTER发出的请求会让等待最久的REQ来处理。请看示例：
 
 ```c
 //
