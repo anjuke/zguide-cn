@@ -572,7 +572,7 @@ assert (rc == 0);
      Figure # - Parallel Pipeline with Kill signaling
 ```
 
-下面是worker进程的代码，它会打开三个套接字：用于接收任务的PULL、用户发送结果的PUSH、以及用于接收自杀信号的SUB，使用zmq_poll()进行轮询：
+下面是worker进程的代码，它会打开三个套接字：用于接收任务的PULL、用于发送结果的PUSH、以及用于接收自杀信号的SUB，使用zmq_poll()进行轮询：
 
 **taskwork2: Parallel task worker with kill signaling in C**
 
