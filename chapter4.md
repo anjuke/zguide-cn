@@ -2357,7 +2357,7 @@ int main (int argc, char *argv [])
 
 ![5](https://github.com/anjuke/zguide-cn/raw/master/images/chapter4_5.png)
 
-这样一来，居然就既是worker又是client。client和巨人之间的对话一般是：
+这样一来，巨人就既是worker又是client。client和巨人之间的对话一般是：
 
   * Client: 请帮我处理这个请求。巨人：好的。
   * Client: 有要给我的应答吗？巨人：有的。（或者没有）
