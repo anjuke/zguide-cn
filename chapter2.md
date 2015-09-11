@@ -1318,7 +1318,7 @@ int main (void)
 
 ```c
 //
-//  订阅者 - 同步班
+//  订阅者 - 同步版
 //
 #include "zhelpers.h"
  
@@ -1821,4 +1821,3 @@ ZMQ就像是一盒积木，只要你有足够的想象力，就可以用它组�
 这种高可扩、高弹性的架构一定会打开你的眼界。其实这并不是ZMQ原创的，早就有像[Erlang](http://www.erlang.org/)这样的[基于流的编程语言](http://en.wikipedia.org/wiki/Flow-based_programming)已经能够做到了，只是ZMQ提供了更为友善和易用的接口。
 
 正如[Gonzo Diethelm](http://permalink.gmane.org/gmane.network.zeromq.devel/2145)所言：“我想用一句话来总结，‘如果ZMQ不存在，那它就应该被发明出来。’作为一个有着多年相关工作经验的人，ZMQ太能引起我的共鸣了。我只能说，‘这就是我想要的！’”
-
