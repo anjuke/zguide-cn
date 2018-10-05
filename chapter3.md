@@ -576,7 +576,7 @@ Figure # - Stretched request-reply
 
 这种结构的关键在于，ROUTER会将消息来自哪个REQ记录下来，生成一个信封。DEALER和REP套接字在传输消息的过程中不会丢弃或更改信封的内容，这样当消息返回给ROUTER时，它就知道应该发送给哪个REQ了。这个模型中的REP套接字是匿名的，并没有特定的地址，所以只能提供同一种服务。
 
-上述结构中，对REP的路由我们使用了DEADER自带的负载均衡算法。但是，我们想用LRU算法来进行路由，这就要用到ROUTER-REP模式：
+上述结构中，对REP的路由我们使用了DEALER自带的负载均衡算法。但是，我们想用LRU算法来进行路由，这就要用到ROUTER-REP模式：
 
 ![12](https://github.com/anjuke/zguide-cn/raw/master/images/chapter3_12.png)
 
@@ -1217,7 +1217,7 @@ int main (void)
 * client连接至server并发送请求；
 * 每一次收到请求，server会发送0至N个应答；
 * client可以同时发送多个请求而不需要等待应答；
-* server可以同时发送多个应答二不需要新的请求。
+* server可以同时发送多个应答而不需要新的请求。
 
 **asyncsrd.c**
 
